@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PINGJOOR</title>
+<style>
+@font-face{font-family:PJFont;font-weight:100 900;font-display:swap;src:url(fonts/Vazirmatn.woff2) format('woff2'),local('Vazirmatn'),local('Vazirmatn UI'),local('IRANSansX'),local('IRANSans'),local('Shabnam'),local('Sahel'),local('Samim'),local('Segoe UI Variable Text'),local('Segoe UI')}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body::before{content:"";position:fixed;inset:0;z-index:0;background:#05070f url(bg/hero.jpg) 50% 50%/cover no-repeat;filter:brightness(1.12) saturate(1.08)}
+body{color:#eef2ff;font:400 14px/1.9 PJFont,Vazirmatn,"Segoe UI Variable Text","Segoe UI",Tahoma,sans-serif;display:grid;place-items:center;padding:18px;
+background:#05070f;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;font-kerning:normal;font-feature-settings:"kern","liga"}
+.card{position:relative;z-index:2;width:min(460px,100%);padding:30px 26px;border-radius:28px;border:1px solid rgba(255,255,255,.14);
+background:linear-gradient(165deg,rgba(12,18,42,.58),rgba(4,6,18,.70) 70%);-webkit-backdrop-filter:blur(16px) saturate(1.2);backdrop-filter:blur(16px) saturate(1.2);animation:fade .5s ease both;
+box-shadow:0 30px 80px -30px rgba(0,0,0,.85),inset 0 1px 0 rgba(255,255,255,.10);text-align:center}
+@keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.shade{position:fixed;inset:0;z-index:1;pointer-events:none;background:radial-gradient(ellipse at 50% 50%,rgba(4,6,18,0) 35%,rgba(4,6,18,.5) 100%)}
+.logo{width:84px;height:84px;margin:0 auto 10px}
+.logo img{width:100%;height:100%;image-rendering:pixelated;filter:drop-shadow(0 8px 18px rgba(61,107,255,.55))}
+h1{margin:0;font:800 27px/1.4 'Segoe UI Variable Display','Segoe UI',PJFont,sans-serif;letter-spacing:1.5px}
+h1 span{background:linear-gradient(90deg,#6f93ff,#a8c0ff 55%,#7be3ff);-webkit-background-clip:text;background-clip:text;color:transparent}
+p{margin:8px 0 20px;color:#c3cdf2;font-size:14.5px;font-weight:500;line-height:2}
+input{width:100%;height:52px;font-size:14px;border-radius:16px;border:1px solid rgba(150,176,255,.3);background:rgba(255,255,255,.07);color:#fff;padding:0 16px;font:inherit;direction:ltr;text-align:left;outline:0}
+input:focus{border-color:#6f93ff;box-shadow:0 0 0 3px rgba(61,107,255,.25)}
+.row{display:flex;gap:10px;margin-top:14px}
+button{font:inherit;font-size:15px;border:0;border-radius:16px;min-height:52px;padding:0 20px;color:#fff;font-weight:600;letter-spacing:0;cursor:pointer;flex:1;transition:transform .15s,filter .2s}button:hover{filter:brightness(1.12)}button:active{transform:scale(.97)}
+.pr{background:linear-gradient(135deg,#3d6bff,#7b9cff);box-shadow:0 16px 36px -12px rgba(61,107,255,.8)}
+.gh{background:rgba(255,255,255,.08);border:1px solid rgba(150,176,255,.26)}
+button:disabled{opacity:.55;cursor:default}#go:disabled{opacity:1}.bsp{display:inline-block;width:22px;height:22px;border-radius:50%;border:3px solid rgba(255,255,255,.35);border-top-color:#fff;animation:s .8s linear infinite;vertical-align:middle}
+.msg{min-height:24px;margin-top:12px;font-size:13.5px;font-weight:500;color:#ffb3bb}.msg.ok{color:#9be7c4}
+.hint{margin-top:18px;font-size:12.5px;line-height:2;font-weight:400;color:#a9b7ea}
+.spin{width:34px;height:34px;margin:6px auto 12px;border-radius:50%;border:3px solid rgba(255,255,255,.18);border-top-color:#7b9cff;animation:s 1s linear infinite}
+@keyframes s{to{transform:rotate(360deg)}}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<div class="shade"></div>
+<div class="card">
+  <div class="logo"><img src="logo.svg" alt=""></div>
+  <h1>PING<span>JOOR</span></h1>
+
+  <div id="setup" hidden>
+    <p>لینک پنل اشتراک خود را وارد کنید</p>
+    <input id="u" placeholder="https://example.com/u/xxxxxxxx" autocomplete="off" spellcheck="false">
+    <div class="row"><button class="pr" id="go">ورود</button><button class="gh" id="paste">چسباندن</button></div>
+    <div class="msg" id="err"></div>
+    <div class="hint">لینک را همان‌طور که در تلگرام یا از ادمین گرفته‌اید وارد کنید؛ فقط یک بار لازم است.</div>
+  </div>
+
+  <div id="conn" hidden>
+    <div class="spin" id="spin"></div>
+    <p id="ctext">در حال اتصال به پنل...</p>
+    <div class="row" id="crow" hidden><button class="pr" id="retry">تلاش دوباره</button><button class="gh" id="chg">تغییر لینک</button></div>
+  </div>
+</div>
+<script>
+(function () {
+  var K = 'pj_panel_url';
+  function $(i) { return document.getElementById(i); }
+  function get() { try { return localStorage.getItem(K) || ''; } catch (e) { return ''; } }
+  function set(v) { try { localStorage.setItem(K, v); } catch (e) {} }
+  function norm(v) {
+    v = (v || '').trim().replace(/\s+/g, '');
+    if (!v) return '';
+    if (!/^https?:\/\//i.test(v)) v = 'http://' + v;
+    try {
+      var x = new URL(v);
+      if (!/^\/u\/[^\/]+/.test(x.pathname)) return '';
+      return x.href;
+    } catch (e) { return ''; }
+  }
+  function show(id) { ['setup', 'conn'].forEach(function (k) { $(k).hidden = k !== id; }); }
+  function connect(url, fromBtn) {
+    var wvm = window.chrome && window.chrome.webview && window.chrome.webview.postMessage;
+    if (wvm) {
+      /* the panel loads in the background; this page stays until it is completely ready */
+      if (fromBtn) { $('go').disabled = true; $('go').innerHTML = '<span class="bsp"></span>'; $('paste').disabled = true; $('u').disabled = true; }
+      else { show('conn'); $('spin').hidden = false; $('crow').hidden = true; $('ctext').textContent = 'در حال اتصال به پنل...'; }
+      window.chrome.webview.postMessage('pjgo:' + url);
+      return;
+    }
+    show('conn'); $('spin').hidden = false; $('crow').hidden = true; $('ctext').textContent = 'در حال اتصال به پنل...';
+    setTimeout(function () { location.replace(url); }, 250);
+  }
+  function setup(prefill) {
+    show('setup'); $('err').textContent = ''; $('u').value = prefill || get();
+    $('u').focus();
+  }
+  function failed() {
+    show('conn'); $('spin').hidden = true; $('crow').hidden = false;
+    $('ctext').textContent = 'اتصال به پنل برقرار نشد. اینترنت یا لینک را بررسی کنید.';
+    $('retry').onclick = function () { connect(get()); };
+    $('chg').onclick = function () { setup(); };
+  }
+  $('go').onclick = function () {
+    var u = norm($('u').value);
+    if (!u) { $('err').className = 'msg'; $('err').textContent = 'لینک معتبر نیست. باید شبیه https://آدرس/u/کد باشد.'; return; }
+    set(u); connect(u, true);
+  };
+  $('u').addEventListener('keydown', function (e) { if (e.key === 'Enter') $('go').onclick(); });
+  $('paste').onclick = function () {
+    if (navigator.clipboard && navigator.clipboard.readText) {
+      navigator.clipboard.readText().then(function (t) { $('u').value = (t || '').trim(); }).catch(function () { $('u').focus(); });
+    } else { $('u').focus(); }
+  };
+  var q = location.search, saved = get();
+  if (/[?&]fail=1/.test(q) && saved) failed();
+  else if (saved && !/[?&]change=1/.test(q) && norm(saved)) connect(saved);
+  else setup();
+})();
+</script>
+</body>
+</html>
