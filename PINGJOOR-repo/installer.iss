@@ -1,6 +1,6 @@
 [Setup]
 AppName=PINGJOOR
-AppVersion=2.0
+AppVersion=2.0.1
 AppPublisher=PINGJOOR
 DefaultDirName={localappdata}\PINGJOOR
 DisableDirPage=yes
@@ -18,13 +18,9 @@ CloseApplications=yes
 WizardStyle=modern
 
 [Files]
-Source: "build\PINGJOOR.exe"; DestDir: "{app}"; Flags: ignoreversion
-Source: "build\Microsoft.Web.WebView2.Core.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "build\Microsoft.Web.WebView2.WinForms.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "build\WebView2Loader.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "build\bridge.js"; DestDir: "{app}"; Flags: ignoreversion
-Source: "build\icon.ico"; DestDir: "{app}"; Flags: ignoreversion
-Source: "build\ui\*"; DestDir: "{app}\ui"; Flags: ignoreversion recursesubdirs createallsubdirs
+; Install the complete self-contained .NET publish output, including native runtime files.
+; Keep the WebView2 bootstrapper outside the app directory and extract it only when needed.
+Source: "build\*"; DestDir: "{app}"; Excludes: "WebView2Setup.exe"; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: "build\WebView2Setup.exe"; DestDir: "{tmp}"; Flags: deleteafterinstall; Check: NeedRuntime
 
 [Icons]
@@ -39,5 +35,5 @@ Filename: "{app}\PINGJOOR.exe"; Description: "Run PINGJOOR"; Flags: nowait posti
 function NeedRuntime: Boolean;
 begin
   Result := not (RegKeyExists(HKLM32, 'SOFTWARE\Microsoft\EdgeUpdate\Clients\{F3017226-FE2A-4295-8BDF-00C3A9A7E4C5}') or
-                 RegKeyExists(HKCU, 'Software\Microsoft\EdgeUpdate\Clients\{F3017226-FE2A-4295-8BDF-00C3A9A7E4C5}'));
+                 RegKeyExists(HKCU, 'Software\Microsoft\EdgeUpdate\Clients\{F3017226-FE2A-4295-8BDF-00C3A9A7C5}'));
 end;
