@@ -35,5 +35,5 @@ Filename: "{app}\PINGJOOR.exe"; Description: "Run PINGJOOR"; Flags: nowait posti
 function NeedRuntime: Boolean;
 begin
   Result := not (RegKeyExists(HKLM32, 'SOFTWARE\Microsoft\EdgeUpdate\Clients\{F3017226-FE2A-4295-8BDF-00C3A9A7E4C5}') or
-                 RegKeyExists(HKCU, 'Software\Microsoft\EdgeUpdate\Clients\{F3017226-FE2A-4295-8BDF-00C3A9A7C5}'));
+                 RegKeyExists(HKCU, 'Software\Microsoft\EdgeUpdate\Clients\{F3017226-FE2A-4295-8BDF-00C3A9A7E4C5}'));
 end;
